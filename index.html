@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Work Ledger</title>
+<style>
+:root{--bg:#f3f6f5;--card:#fff;--ink:#12302c;--mute:#6b7f7b;--pri:#0f766e;--pri2:#14b8a6;--bad:#dc2626;--warn:#d97706;--line:#e2e9e7}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1514;--card:#16211f;--ink:#e6f1ef;--mute:#8aa09c;--line:#243431}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:100px}
+header{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px 70px;border-radius:0 0 28px 28px}
+.top{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:20px;margin:0}
+.icon{background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:12px;font-size:18px}
+.month{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:16px}
+.month b{font-size:18px;min-width:150px;text-align:center}
+.month button{background:rgba(255,255,255,.2);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:18px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:-48px 14px 0}
+.stat{background:var(--card);border-radius:16px;padding:12px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.stat small{color:var(--mute);font-size:11px}
+.stat div{font-size:18px;font-weight:700;margin-top:2px}
+.stat.big{grid-column:1/-1}.stat.big div{font-size:28px;color:var(--pri)}
+.list{padding:16px 14px}
+.item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;border:1px solid var(--line)}
+.date{width:48px;text-align:center;line-height:1.1}.date b{font-size:20px;display:block}.date span{font-size:11px;color:var(--mute)}
+.mid{flex:1;min-width:0}.mid .note{color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;display:inline-block;margin-bottom:3px}
+.Present{background:#d1fae5;color:#065f46}.Half{background:#fef3c7;color:#92400e}.Absent{background:#fee2e2;color:#991b1b}.Holiday{background:#e0e7ff;color:#3730a3}
+.amt{font-weight:700;text-align:right}.amt small{display:block;color:var(--warn);font-weight:500;font-size:11px}
+.empty{text-align:center;color:var(--mute);padding:40px 0}
+.fab{position:fixed;right:20px;bottom:calc(env(safe-area-inset-bottom) + 20px);width:60px;height:60px;border-radius:20px;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(15,118,110,.45)}
+dialog{border:0;border-radius:22px;padding:0;width:min(92vw,420px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+form{padding:20px;display:grid;gap:12px}
+form h2{margin:0}
+label{font-size:12px;color:var(--mute);display:grid;gap:4px}
+input,select{font:inherit;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;gap:10px;margin-top:4px}
+.btns button{flex:1;padding:12px;border-radius:12px;border:0;font:inherit;font-weight:600}
+.save{background:var(--pri);color:#fff}.cancel{background:var(--line);color:var(--ink)}.del{background:#fee2e2;color:var(--bad);flex:0 0 auto!important}
+.menu button{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;text-align:left}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>📒 Work Ledger</h1><button class="icon" id="setBtn">⚙️</button></div>
+  <div class="month"><button id="prev">‹</button><b id="mLabel"></b><button id="next">›</button></div>
+</header>
+<div class="stats">
+  <div class="stat big"><small>Thla total (Wage + Extra)</small><div id="sTotal">₹0</div></div>
+  <div class="stat"><small>Present</small><div id="sDays">0</div></div>
+  <div class="stat"><small>Wage</small><div id="sWage">₹0</div></div>
+  <div class="stat"><small>Extra</small><div id="sExtra">₹0</div></div>
+</div>
+<div class="list" id="list"></div>
+<button class="fab" id="add">+</button>
+
+<dialog id="dlg"><form id="f" method="dialog">
+  <h2 id="dTitle">Entry thar</h2>
+  <label>Date<input type="date" id="fDate" required></label>
+  <div class="row">
+    <label>Status<select id="fStatus"><option>Present</option><option>Half Day</option><option>Absent</option><option>Holiday</option></select></label>
+    <label>Ni khat wage (₹)<input type="number" id="fRate" inputmode="decimal"></label>
+  </div>
+  <div class="row">
+    <label>Calculated Wage<input type="number" id="fWage" inputmode="decimal"></label>
+    <label>Extra Amount<input type="number" id="fExtra" inputmode="decimal" value="0"></label>
+  </div>
+  <label>Note<input type="text" id="fNote" placeholder="Tuna: Durtlang"></label>
+  <div class="btns"><button type="button" class="del" id="fDel">🗑</button><button type="button" class="cancel" id="fCancel">Cancel</button><button class="save" id="fSave" type="submit">Save</button></div>
+</form></dialog>
+
+<dialog id="sdlg"><form method="dialog" class="menu">
+  <h2>Settings</h2>
+  <label>Ni khat wage default (₹)<input type="number" id="setRate" inputmode="decimal"></label>
+  <button type="button" id="exp">⬇️ CSV Export</button>
+  <button type="button" id="imp">⬆️ CSV Import</button>
+  <input type="file" id="file" accept=".csv" hidden>
+  <div class="btns"><button class="save" id="setSave">Save</button><button type="button" class="cancel" id="setClose">Close</button></div>
+</form></dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='workledger.v1',RK='workledger.rate';
+let data=[];try{data=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){}
+let rate=+localStorage.getItem(RK)||800;
+let cur=new Date();cur.setDate(1);let editing=null;
+const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const key=s=>s==='Half Day'?'Half':s;
+const factor={'Present':1,'Half Day':.5,'Absent':0,'Holiday':0};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+function render(){
+  const p=ymd(cur).slice(0,7);
+  $('mLabel').textContent=cur.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const rows=data.filter(r=>r.date.startsWith(p)).sort((a,b)=>b.date.localeCompare(a.date));
+  let w=0,x=0,d=0;
+  rows.forEach(r=>{w+=+r.wage;x+=+r.extra;if(r.status==='Present')d++;if(r.status==='Half Day')d+=.5});
+  $('sWage').textContent=inr(w);$('sExtra').textContent=inr(x);$('sTotal').textContent=inr(w+x);$('sDays').textContent=d;
+  $('list').innerHTML=rows.length?rows.map(r=>{const dt=new Date(r.date+'T00:00');
+    return `<div class="item" data-id="${r.id}"><div class="date"><b>${dt.getDate()}</b><span>${dt.toLocaleDateString('en-GB',{weekday:'short'})}</span></div>
+    <div class="mid"><span class="tag ${key(r.status)}">${r.status}</span><div class="note">${esc(r.note)||'—'}</div></div>
+    <div class="amt">${inr(+r.wage+ +r.extra)}${+r.extra?`<small>+${inr(r.extra)} extra</small>`:''}</div></div>`}).join(''):'<div class="empty">Entry a awm lo.<br>＋ hmet la, thar belh rawh.</div>';
+}
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function openForm(r){
+  editing=r||null;
+  $('dTitle').textContent=r?'Entry siam thatna':'Entry thar';
+  $('fDate').value=r?r.date:ymd(new Date());
+  $('fStatus').value=r?r.status:'Present';
+  $('fRate').value=r?r.rate:rate;
+  $('fWage').value=r?r.wage:rate;
+  $('fExtra').value=r?r.extra:0;
+  $('fNote').value=r?r.note:'';
+  $('fDel').style.display=r?'':'none';
+  $('dlg').showModal();
+}
+const recalc=()=>$('fWage').value=(+$('fRate').value||0)*factor[$('fStatus').value];
+$('fStatus').onchange=recalc;$('fRate').oninput=recalc;
+$('add').onclick=()=>openForm();
+$('fCancel').onclick=()=>$('dlg').close();
+$('f').onsubmit=e=>{
+  const r={id:editing?editing.id:Date.now()+''+Math.random().toString(36).slice(2,6),date:$('fDate').value,status:$('fStatus').value,rate:+$('fRate').value||0,wage:+$('fWage').value||0,extra:+$('fExtra').value||0,note:$('fNote').value.trim()};
+  if(editing)data[data.indexOf(editing)]=r;else data.push(r);
+  save();cur=new Date(r.date+'T00:00');cur.setDate(1);render();
+};
+$('fDel').onclick=()=>{if(confirm('He entry hi delete a ni ang a?')){data=data.filter(r=>r!==editing);save();$('dlg').close();render()}};
+$('list').onclick=e=>{const el=e.target.closest('.item');if(el)openForm(data.find(r=>r.id===el.dataset.id))};
+$('prev').onclick=()=>{cur.setMonth(cur.getMonth()-1);render()};
+$('next').onclick=()=>{cur.setMonth(cur.getMonth()+1);render()};
+
+$('setBtn').onclick=()=>{$('setRate').value=rate;$('sdlg').showModal()};
+$('setClose').onclick=()=>$('sdlg').close();
+$('setSave').onclick=()=>{rate=+$('setRate').value||800;localStorage.setItem(RK,rate)};
+
+$('exp').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=['"Date","Status","Calculated Wage","Extra Amount","Note"',...[...data].sort((a,b)=>a.date.localeCompare(b.date)).map(r=>[r.date,r.status,r.wage,r.extra,r.note].map(q).join(','))];
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+  a.download='WorkLedger-'+ymd(cur).slice(0,7)+'.csv';a.click();
+};
+$('imp').onclick=()=>$('file').click();
+$('file').onchange=async e=>{
+  const txt=await e.target.files[0].text();let n=0;
+  txt.split(/\r?\n/).slice(1).filter(Boolean).forEach(l=>{
+    const c=[...l.matchAll(/"((?:[^"]|"")*)"|([^,]+)/g)].map(m=>(m[1]??m[2]).replace(/""/g,'"'));
+    if(!/^\d{4}-\d\d-\d\d$/.test(c[0]))return;
+    const ex=data.find(r=>r.date===c[0]&&r.note===(c[4]||''));if(ex)return;
+    data.push({id:Date.now()+''+n++,date:c[0],status:c[1]||'Present',rate:rate,wage:+c[2]||0,extra:+c[3]||0,note:c[4]||''});
+  });
+  save();render();alert(n+' entry import ani.');e.target.value='';
+};
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>

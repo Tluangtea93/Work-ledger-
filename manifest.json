@@ -1,7 +1,7 @@
 {
   "name": "Work Ledger",
   "short_name": "WorkLedger",
-  "description": "Ni tin hnathawh leh wage chhinchhiahna",
+  "description": "Ni tin hlawh chhinchhiahna - Work Ledger",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

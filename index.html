@@ -8,157 +8,536 @@
 <link rel="icon" href="icon-192.png">
 <title>Work Ledger</title>
 <style>
-:root{--bg:#f3f6f5;--card:#fff;--ink:#12302c;--mute:#6b7f7b;--pri:#0f766e;--pri2:#14b8a6;--bad:#dc2626;--warn:#d97706;--line:#e2e9e7}
-@media(prefers-color-scheme:dark){:root{--bg:#0d1514;--card:#16211f;--ink:#e6f1ef;--mute:#8aa09c;--line:#243431}}
+:root{
+  --bg:#f2f6f5;--card:#ffffff;--ink:#10302c;--mute:#678079;--line:#e1eae8;
+  --pri:#0f766e;--pri2:#14b8a6;--accent:#f59e0b;
+  --Present:#10b981;--Half:#f59e0b;--Absent:#ef4444;--Holiday:#6366f1;
+  --shadow:0 6px 22px rgba(16,48,44,.09);--r:20px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#0b1312;--card:#142220;--ink:#e8f3f1;--mute:#8aa39e;--line:#23352f;--shadow:0 6px 22px rgba(0,0,0,.35)}}
+:root[data-theme=dark]{--bg:#0b1312;--card:#142220;--ink:#e8f3f1;--mute:#8aa39e;--line:#23352f;--shadow:0 6px 22px rgba(0,0,0,.35)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:100px}
-header{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px 70px;border-radius:0 0 28px 28px}
-.top{display:flex;justify-content:space-between;align-items:center}
-h1{font-size:20px;margin:0}
-.icon{background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:12px;font-size:18px}
-.month{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:16px}
-.month b{font-size:18px;min-width:150px;text-align:center}
-.month button{background:rgba(255,255,255,.2);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:18px}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:-48px 14px 0}
-.stat{background:var(--card);border-radius:16px;padding:12px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.stat small{color:var(--mute);font-size:11px}
-.stat div{font-size:18px;font-weight:700;margin-top:2px}
-.stat.big{grid-column:1/-1}.stat.big div{font-size:28px;color:var(--pri)}
-.list{padding:16px 14px}
-.item{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;border:1px solid var(--line)}
-.date{width:48px;text-align:center;line-height:1.1}.date b{font-size:20px;display:block}.date span{font-size:11px;color:var(--mute)}
-.mid{flex:1;min-width:0}.mid .note{color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;display:inline-block;margin-bottom:3px}
-.Present{background:#d1fae5;color:#065f46}.Half{background:#fef3c7;color:#92400e}.Absent{background:#fee2e2;color:#991b1b}.Holiday{background:#e0e7ff;color:#3730a3}
-.amt{font-weight:700;text-align:right}.amt small{display:block;color:var(--warn);font-weight:500;font-size:11px}
-.empty{text-align:center;color:var(--mute);padding:40px 0}
-.fab{position:fixed;right:20px;bottom:calc(env(safe-area-inset-bottom) + 20px);width:60px;height:60px;border-radius:20px;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(15,118,110,.45)}
-dialog{border:0;border-radius:22px;padding:0;width:min(92vw,420px);background:var(--card);color:var(--ink)}
-dialog::backdrop{background:rgba(0,0,0,.5)}
-form{padding:20px;display:grid;gap:12px}
-form h2{margin:0}
-label{font-size:12px;color:var(--mute);display:grid;gap:4px}
-input,select{font:inherit;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btns{display:flex;gap:10px;margin-top:4px}
-.btns button{flex:1;padding:12px;border-radius:12px;border:0;font:inherit;font-weight:600}
-.save{background:var(--pri);color:#fff}.cancel{background:var(--line);color:var(--ink)}.del{background:#fee2e2;color:var(--bad);flex:0 0 auto!important}
-.menu button{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;text-align:left}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(150px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+.hdr{background:linear-gradient(140deg,#0b5f59 0%,var(--pri) 45%,var(--pri2) 100%);color:#fff;padding:calc(env(safe-area-inset-top) + 16px) 18px 86px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}
+.hdr::before,.hdr::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.08)}
+.hdr::before{width:220px;height:220px;right:-70px;top:-90px}
+.hdr::after{width:150px;height:150px;left:-50px;bottom:-60px}
+.top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;backdrop-filter:blur(6px)}
+.brand h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.2px}
+.brand small{display:block;font-size:11px;opacity:.8;margin-top:1px}
+.chip{background:rgba(255,255,255,.2);border:0;color:#fff;height:36px;padding:0 12px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;backdrop-filter:blur(6px)}
+.mnav{display:flex;align-items:center;justify-content:space-between;margin-top:20px;position:relative;z-index:1}
+.mnav button{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;display:grid;place-items:center}
+.mnav button:active{transform:scale(.92)}
+.mnav .lbl{text-align:center}
+.mnav .lbl b{font-size:22px;display:block;font-weight:700}
+.mnav .lbl span{font-size:12px;opacity:.85}
+.total{margin:-64px 16px 0;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;position:relative;z-index:2}
+.total .k{font-size:12px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.total .v{font-size:34px;font-weight:800;color:var(--pri);margin:2px 0 12px;letter-spacing:-.5px}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mini{background:var(--bg);border-radius:14px;padding:10px 8px;text-align:center}
+.mini b{display:block;font-size:16px}
+.mini span{font-size:11px;color:var(--mute)}
+main{padding:0 16px}
+.view{display:none;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-top:16px}
+.card h3{margin:0 0 12px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.quick{display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,rgba(16,185,129,.14),rgba(20,184,166,.14));border:1px dashed var(--Present)}
+.quick p{margin:0;flex:1;font-size:14px;font-weight:600}
+.quick button{background:var(--Present);color:#fff;border:0;padding:11px 14px;border-radius:14px;font-weight:700;box-shadow:0 4px 12px rgba(16,185,129,.4)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;touch-action:pan-y}
+.cal .wd{text-align:center;font-size:11px;color:var(--mute);font-weight:700;padding-bottom:4px}
+.cal .d{aspect-ratio:1/1.12;border-radius:12px;border:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;position:relative;padding:0;line-height:1.15}
+.cal .d small{font-size:9px;font-weight:600;opacity:.9}
+.cal .d.e{background:transparent;pointer-events:none}
+.cal .d.today{outline:2px solid var(--pri);outline-offset:-2px}
+.cal .d:active{transform:scale(.92)}
+.cal .d.Present{background:var(--Present);color:#fff}
+.cal .d.Half{background:var(--Half);color:#fff}
+.cal .d.Absent{background:var(--Absent);color:#fff}
+.cal .d.Holiday{background:var(--Holiday);color:#fff}
+.cal .d.multi::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.15)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--mute)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.search{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;margin-bottom:10px}
+.item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--line);cursor:pointer}
+.item:first-of-type{border-top:0}
+.item:active{opacity:.6}
+.dt{width:46px;height:50px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex:none}
+.dt b{font-size:18px;line-height:1}.dt span{font-size:10px;opacity:.9;margin-top:2px}
+.dt.Present{background:var(--Present)}.dt.Half{background:var(--Half)}.dt.Absent{background:var(--Absent)}.dt.Holiday{background:var(--Holiday)}
+.mid{flex:1;min-width:0}
+.mid .s{font-weight:700;font-size:14px}
+.mid .n{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.amt{text-align:right;font-weight:800;font-size:15px}
+.amt small{display:block;font-weight:600;font-size:11px;color:var(--accent)}
+.amt small.neg{color:var(--Absent)}
+.empty{text-align:center;color:var(--mute);padding:26px 10px;font-size:14px;line-height:1.6}
+.empty .big{font-size:40px;display:block;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--bg);border-radius:16px;padding:14px}
+.stat span{font-size:11.5px;color:var(--mute);display:block}
+.stat b{font-size:20px;display:block;margin-top:2px}
+.bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--bg);margin:6px 0 12px}
+.bar div{height:100%}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--mute);font-size:9px;font-family:inherit}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row label{font-size:14px;font-weight:600}
+.row small{display:block;color:var(--mute);font-weight:400;font-size:12px;margin-top:2px}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 11px;border-radius:9px;font-size:13px;font-weight:600;color:var(--mute)}
+.seg button.on{background:var(--pri);color:#fff}
+.btn{border:0;border-radius:14px;padding:13px 16px;font-weight:700;font-size:14px;background:var(--bg);color:var(--ink);width:100%;text-align:left;display:flex;align-items:center;gap:10px;margin-top:8px}
+.btn.danger{color:var(--Absent)}
+.btn.pri{background:var(--pri);color:#fff;justify-content:center;text-align:center}
+input[type=number].inline{width:110px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;text-align:right}
+footer{text-align:center;color:var(--mute);font-size:12.5px;padding:26px 16px 8px}
+footer b{color:var(--pri);font-weight:700}
+footer span{display:block;margin-top:4px;font-size:11px;opacity:.7}
+nav.tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));background:var(--card);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,.18);display:flex;justify-content:space-around;padding:8px;z-index:20;border:1px solid var(--line)}
+nav.tabs button{flex:1;border:0;background:transparent;border-radius:16px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--mute)}
+nav.tabs button.on{color:var(--pri);background:rgba(20,184,166,.14)}
+.fab{position:fixed;right:22px;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;box-shadow:0 8px 22px rgba(15,118,110,.5);display:grid;place-items:center;z-index:21}
+.fab:active{transform:scale(.92)}
+svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+dialog{border:0;border-radius:26px 26px 0 0;padding:0;width:100%;max-width:520px;margin:auto auto 0;background:var(--card);color:var(--ink);max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
+dialog[open]{animation:up .25s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+form{padding:20px 18px calc(18px + env(safe-area-inset-bottom));display:grid;gap:14px}
+form h2{margin:0;font-size:19px}
+.f{display:grid;gap:5px}
+.f>span{font-size:12px;color:var(--mute);font-weight:600}
+.f input{font:inherit;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.stsel{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stsel button{border:2px solid transparent;background:var(--bg);border-radius:14px;padding:10px 2px;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px}
+.stsel button em{font-style:normal}
+.stsel button i{width:12px;height:12px;border-radius:50%}
+.stsel button.on{border-color:currentColor;background:transparent}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts{display:flex;gap:10px}
+.acts button{flex:1;padding:14px;border-radius:14px;border:0;font-weight:700;font-size:15px}
+.acts .save{background:var(--pri);color:#fff;flex:2}
+.acts .cancel{background:var(--bg)}
+.acts .del{flex:0 0 52px;background:rgba(239,68,68,.14);color:var(--Absent)}
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#10302c;color:#fff;padding:12px 16px;border-radius:14px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;display:flex;gap:14px;align-items:center;max-width:90vw}
+#toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast button{background:none;border:0;color:#5eead4;font-weight:800}
 </style>
 </head>
 <body>
-<header>
-  <div class="top"><h1>📒 Work Ledger</h1><button class="icon" id="setBtn">⚙️</button></div>
-  <div class="month"><button id="prev">‹</button><b id="mLabel"></b><button id="next">›</button></div>
-</header>
-<div class="stats">
-  <div class="stat big"><small>Thla total (Wage + Extra)</small><div id="sTotal">₹0</div></div>
-  <div class="stat"><small>Present</small><div id="sDays">0</div></div>
-  <div class="stat"><small>Wage</small><div id="sWage">₹0</div></div>
-  <div class="stat"><small>Extra</small><div id="sExtra">₹0</div></div>
+
+<div class="hdr">
+  <div class="top">
+    <div class="brand">
+      <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h7M8 13h7M8 17h4"/></svg></div>
+      <div><h1>Work Ledger</h1><small id="subtitle"></small></div>
+    </div>
+    <button class="chip" id="langQuick" aria-label="language">🌐 <span id="langCode">MI</span></button>
+  </div>
+  <div class="mnav">
+    <button id="prev" aria-label="previous"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="lbl"><b id="mLabel"></b><span id="mSub"></span></div>
+    <button id="next" aria-label="next"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
 </div>
-<div class="list" id="list"></div>
-<button class="fab" id="add">+</button>
+
+<div class="total">
+  <div class="k" id="tLabel"></div>
+  <div class="v" id="sTotal">₹0</div>
+  <div class="minis">
+    <div class="mini"><b id="sDays">0</b><span id="lDays"></span></div>
+    <div class="mini"><b id="sWage">₹0</b><span id="lWage"></span></div>
+    <div class="mini"><b id="sExtra">₹0</b><span id="lExtra"></span></div>
+  </div>
+</div>
+
+<main>
+  <section class="view on" id="v-home">
+    <div class="card quick" id="quick" style="display:none"><p id="quickTxt"></p><button id="quickBtn"></button></div>
+    <div class="card">
+      <h3 id="calTitle"></h3>
+      <div class="cal" id="cal"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="card">
+      <h3><span id="listTitle"></span></h3>
+      <input class="search" id="search" type="search">
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-stats">
+    <div class="card">
+      <h3 id="brkTitle"></h3>
+      <div class="bar" id="brkBar"></div>
+      <div class="grid2" id="brkGrid"></div>
+    </div>
+    <div class="card"><h3 id="dayChartTitle"></h3><div id="dayChart"></div></div>
+    <div class="card"><h3 id="monChartTitle"></h3><div id="monChart"></div></div>
+    <div class="card">
+      <h3 id="sumTitle"></h3>
+      <div class="grid2" id="sumGrid"></div>
+      <button class="btn pri" id="shareBtn" style="margin-top:14px"></button>
+    </div>
+  </section>
+
+  <section class="view" id="v-set">
+    <div class="card">
+      <div class="row"><label id="setLang"></label>
+        <div class="seg" id="segLang"><button data-v="mi">Mizo</button><button data-v="en">English</button><button data-v="hi">हिन्दी</button></div></div>
+      <div class="row"><label id="setTheme"></label>
+        <div class="seg" id="segTheme"><button data-v="auto"></button><button data-v="light"></button><button data-v="dark"></button></div></div>
+      <div class="row"><label><span id="setRate"></span><small id="setRateH"></small></label>
+        <input class="inline" type="number" id="rateIn" inputmode="decimal"></div>
+    </div>
+    <div class="card">
+      <h3 id="dataTitle"></h3>
+      <button class="btn" id="expCsv"></button>
+      <button class="btn" id="impCsv"></button>
+      <button class="btn" id="expJson"></button>
+      <button class="btn" id="impJson"></button>
+      <button class="btn danger" id="clearAll"></button>
+      <input type="file" id="fileCsv" accept=".csv,text/csv" hidden>
+      <input type="file" id="fileJson" accept=".json,application/json" hidden>
+    </div>
+    <div class="card" id="aboutCard"></div>
+  </section>
+
+  <footer><div id="foot"></div><span>Work Ledger v2.0</span></footer>
+</main>
+
+<button class="fab" id="add" aria-label="add"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></button>
+
+<nav class="tabs">
+  <button data-tab="home" class="on"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg><span id="tabHome"></span></button>
+  <button data-tab="stats"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span id="tabStats"></span></button>
+  <button data-tab="set"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span id="tabSet"></span></button>
+</nav>
 
 <dialog id="dlg"><form id="f" method="dialog">
-  <h2 id="dTitle">Entry thar</h2>
-  <label>Date<input type="date" id="fDate" required></label>
-  <div class="row">
-    <label>Status<select id="fStatus"><option>Present</option><option>Half Day</option><option>Absent</option><option>Holiday</option></select></label>
-    <label>Ni khat wage (₹)<input type="number" id="fRate" inputmode="decimal"></label>
+  <h2 id="dTitle"></h2>
+  <label class="f"><span id="lDate"></span><input type="date" id="fDate" required></label>
+  <div class="f"><span id="lStatus"></span>
+    <div class="stsel" id="stsel">
+      <button type="button" data-s="Present" style="color:var(--Present)"><i style="background:var(--Present)"></i><em></em></button>
+      <button type="button" data-s="Half Day" style="color:var(--Half)"><i style="background:var(--Half)"></i><em></em></button>
+      <button type="button" data-s="Absent" style="color:var(--Absent)"><i style="background:var(--Absent)"></i><em></em></button>
+      <button type="button" data-s="Holiday" style="color:var(--Holiday)"><i style="background:var(--Holiday)"></i><em></em></button>
+    </div>
   </div>
-  <div class="row">
-    <label>Calculated Wage<input type="number" id="fWage" inputmode="decimal"></label>
-    <label>Extra Amount<input type="number" id="fExtra" inputmode="decimal" value="0"></label>
+  <div class="two">
+    <label class="f"><span id="lRate"></span><input type="number" id="fRate" inputmode="decimal"></label>
+    <label class="f"><span id="lWageF"></span><input type="number" id="fWage" inputmode="decimal"></label>
   </div>
-  <label>Note<input type="text" id="fNote" placeholder="Tuna: Durtlang"></label>
-  <div class="btns"><button type="button" class="del" id="fDel">🗑</button><button type="button" class="cancel" id="fCancel">Cancel</button><button class="save" id="fSave" type="submit">Save</button></div>
+  <label class="f"><span id="lExtraF"></span><input type="number" id="fExtra" inputmode="decimal" value="0"></label>
+  <label class="f"><span id="lNote"></span><input type="text" id="fNote" maxlength="120"></label>
+  <div class="acts">
+    <button type="button" class="del" id="fDel" aria-label="delete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+    <button type="button" class="cancel" id="fCancel"></button>
+    <button class="save" type="submit" id="fSave"></button>
+  </div>
 </form></dialog>
 
-<dialog id="sdlg"><form method="dialog" class="menu">
-  <h2>Settings</h2>
-  <label>Ni khat wage default (₹)<input type="number" id="setRate" inputmode="decimal"></label>
-  <button type="button" id="exp">⬇️ CSV Export</button>
-  <button type="button" id="imp">⬆️ CSV Import</button>
-  <input type="file" id="file" accept=".csv" hidden>
-  <div class="btns"><button class="save" id="setSave">Save</button><button type="button" class="cancel" id="setClose">Close</button></div>
-</form></dialog>
+<div id="toast"><span id="toastTxt"></span><button id="toastBtn" style="display:none"></button></div>
 
 <script>
 const $=id=>document.getElementById(id);
-const KEY='workledger.v1',RK='workledger.rate';
-let data=[];try{data=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){}
-let rate=+localStorage.getItem(RK)||800;
-let cur=new Date();cur.setDate(1);let editing=null;
-const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
-const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
-const key=s=>s==='Half Day'?'Half':s;
+const safe=(f,d)=>{try{return f()}catch(e){return d}};
+
+/* ---------- Translations ---------- */
+const T={
+en:{sub:"Daily work & wage tracker",home:"Home",stats:"Stats",set:"Settings",monthTotal:"This month's total",days:"Days worked",wage:"Wage",extra:"Extra",
+ Present:"Present","Half Day":"Half day",Absent:"Absent",Holiday:"Holiday",
+ cal:"Calendar",entries:"Entries",search:"Search notes or status…",none:"No entries yet",noneH:"Tap the + button to add one.",
+ quick:"Not marked today",quickBtn:"Mark present",marked:"Marked present",
+ newE:"New entry",editE:"Edit entry",date:"Date",status:"Status",rate:"Daily rate (₹)",calc:"Calculated wage (₹)",extraAmt:"Extra amount (₹)",note:"Note",notePh:"e.g. Durtlang",
+ save:"Save",cancel:"Cancel",saved:"Saved",deleted:"Deleted",undo:"Undo",delQ:"Delete this entry?",
+ brk:"Status breakdown",dayChart:"Daily earnings",monChart:"Monthly earnings",sum:"Summary",avg:"Average / worked day",best:"Best day",yearTot:"This year",allTot:"All time",share:"Share this month's summary",
+ lang:"Language",theme:"Theme",auto:"Auto",light:"Light",dark:"Dark",defRate:"Default daily rate",defRateH:"Used for new entries",
+ data:"Your data",expCsv:"Export CSV",impCsv:"Import CSV",expJson:"Full backup (JSON)",impJson:"Restore backup",clear:"Delete all data",clearQ:"Delete ALL entries? This cannot be undone.",
+ imported:"entries imported",restored:"Backup restored",badFile:"Could not read this file",
+ about:"Your data stays on this phone only. Use Export or Backup regularly, especially before changing phones.",
+ foot:"This app is developed by <b>tluangtea</b>",shareHdr:"Work Ledger",workDays:"Days worked",total:"Total",
+ wd:["S","M","T","W","T","F","S"],locale:"en-GB"},
+mi:{sub:"Ni tin hnathawh leh hlawh chhinchhiahna",home:"Home",stats:"Report",set:"Setting",monthTotal:"He thla zawng zawng",days:"Ni thawh",wage:"Hlawh",extra:"Extra",
+ Present:"Thawk","Half Day":"Ni chanve",Absent:"Thawk lo",Holiday:"Chawlhni",
+ cal:"Calendar",entries:"Entry te",search:"Note emaw status zawng…",none:"Entry a awm lo",noneH:"+ hmet la, thar belh rawh.",
+ quick:"Vawiin hi la chhinchhiah lo",quickBtn:"Thawk tiin dah",marked:"Thawk tiin chhinchhiah a ni",
+ newE:"Entry thar",editE:"Entry siam that",date:"Ni",status:"Status",rate:"Ni khat hlawh (₹)",calc:"Hlawh chhut (₹)",extraAmt:"Extra (₹)",note:"Note",notePh:"Tuna: Durtlang",
+ save:"Save",cancel:"Cancel",saved:"Save a ni",deleted:"Delete a ni",undo:"Undo",delQ:"He entry hi delete a ni ang a?",
+ brk:"Status then dan",dayChart:"Ni tin hlawh",monChart:"Thla tin hlawh",sum:"Tawi zawm",avg:"Ni thawh khat average",best:"Ni tha ber",yearTot:"He kum",allTot:"Zawng zawng",share:"He thla report share rawh",
+ lang:"Tawng",theme:"Theme",auto:"Auto",light:"Eng",dark:"Thim",defRate:"Ni khat hlawh (default)",defRateH:"Entry thar atan",
+ data:"I data",expCsv:"CSV Export",impCsv:"CSV Import",expJson:"Backup (JSON)",impJson:"Backup restore",clear:"Data zawng zawng delete",clearQ:"Entry ZAWNG ZAWNG delete a ni ang a? Kir leh theih a ni lo.",
+ imported:"entry import a ni",restored:"Backup restore a ni",badFile:"He file hi chhiar theih a ni lo",
+ about:"I data hi he phone chhungah chauh a awm. Phone i thlak hma in Export emaw Backup siam ṭhin rawh.",
+ foot:"He app hi <b>tluangtea</b> in a siam",shareHdr:"Work Ledger",workDays:"Ni thawh",total:"Zawng zawng",
+ wd:["Pa","Th","Ni","Zi","In","Si","Ta"],locale:"en-GB"},
+hi:{sub:"रोज़ का काम और मज़दूरी हिसाब",home:"होम",stats:"रिपोर्ट",set:"सेटिंग",monthTotal:"इस महीने का कुल",days:"काम के दिन",wage:"मज़दूरी",extra:"अतिरिक्त",
+ Present:"उपस्थित","Half Day":"आधा दिन",Absent:"अनुपस्थित",Holiday:"छुट्टी",
+ cal:"कैलेंडर",entries:"प्रविष्टियाँ",search:"नोट या स्थिति खोजें…",none:"अभी कोई प्रविष्टि नहीं",noneH:"जोड़ने के लिए + दबाएँ।",
+ quick:"आज अभी दर्ज नहीं है",quickBtn:"उपस्थित दर्ज करें",marked:"उपस्थित दर्ज हुआ",
+ newE:"नई प्रविष्टि",editE:"प्रविष्टि बदलें",date:"तारीख",status:"स्थिति",rate:"दैनिक दर (₹)",calc:"गणना की गई मज़दूरी (₹)",extraAmt:"अतिरिक्त राशि (₹)",note:"नोट",notePh:"जैसे: Durtlang",
+ save:"सहेजें",cancel:"रद्द करें",saved:"सहेजा गया",deleted:"हटाया गया",undo:"वापस",delQ:"यह प्रविष्टि हटाएँ?",
+ brk:"स्थिति विवरण",dayChart:"दैनिक कमाई",monChart:"मासिक कमाई",sum:"सारांश",avg:"औसत / काम का दिन",best:"सबसे अच्छा दिन",yearTot:"इस वर्ष",allTot:"कुल (सभी)",share:"इस महीने का सारांश भेजें",
+ lang:"भाषा",theme:"थीम",auto:"ऑटो",light:"लाइट",dark:"डार्क",defRate:"डिफ़ॉल्ट दैनिक दर",defRateH:"नई प्रविष्टियों के लिए",
+ data:"आपका डेटा",expCsv:"CSV निर्यात",impCsv:"CSV आयात",expJson:"पूरा बैकअप (JSON)",impJson:"बैकअप बहाल करें",clear:"सारा डेटा हटाएँ",clearQ:"सभी प्रविष्टियाँ हटाएँ? यह वापस नहीं होगा।",
+ imported:"प्रविष्टियाँ आयात हुईं",restored:"बैकअप बहाल हुआ",badFile:"यह फ़ाइल पढ़ी नहीं जा सकी",
+ about:"आपका डेटा केवल इसी फ़ोन में रहता है। फ़ोन बदलने से पहले Export या Backup ज़रूर करें।",
+ foot:"यह ऐप <b>tluangtea</b> द्वारा बनाया गया है",shareHdr:"Work Ledger",workDays:"काम के दिन",total:"कुल",
+ wd:["र","सो","मं","बु","गु","शु","श"],locale:"hi-IN"}
+};
+
+/* ---------- State ---------- */
+const KEY='workledger.v1',RK='workledger.rate',LK='workledger.lang',TK='workledger.theme';
+let data=safe(()=>JSON.parse(localStorage.getItem(KEY)),null)||[];
+if(!Array.isArray(data))data=[];
+let rate=+safe(()=>localStorage.getItem(RK),0)||800;
+let lang=safe(()=>localStorage.getItem(LK),null)||'mi'; if(!T[lang])lang='mi';
+let theme=safe(()=>localStorage.getItem(TK),null)||'auto';
+let cur=new Date();cur.setDate(1);cur.setHours(0,0,0,0);
+let editing=null,tab='home',query='',draftStatus='Present';
+const t=k=>(T[lang][k]??T.en[k]??k);
+const save=()=>safe(()=>localStorage.setItem(KEY,JSON.stringify(data)));
+const inr=n=>(n<0?'-':'')+'₹'+Math.round(Math.abs(n)).toLocaleString('en-IN');
 const factor={'Present':1,'Half Day':.5,'Absent':0,'Holiday':0};
-const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-
-function render(){
-  const p=ymd(cur).slice(0,7);
-  $('mLabel').textContent=cur.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-  const rows=data.filter(r=>r.date.startsWith(p)).sort((a,b)=>b.date.localeCompare(a.date));
-  let w=0,x=0,d=0;
-  rows.forEach(r=>{w+=+r.wage;x+=+r.extra;if(r.status==='Present')d++;if(r.status==='Half Day')d+=.5});
-  $('sWage').textContent=inr(w);$('sExtra').textContent=inr(x);$('sTotal').textContent=inr(w+x);$('sDays').textContent=d;
-  $('list').innerHTML=rows.length?rows.map(r=>{const dt=new Date(r.date+'T00:00');
-    return `<div class="item" data-id="${r.id}"><div class="date"><b>${dt.getDate()}</b><span>${dt.toLocaleDateString('en-GB',{weekday:'short'})}</span></div>
-    <div class="mid"><span class="tag ${key(r.status)}">${r.status}</span><div class="note">${esc(r.note)||'—'}</div></div>
-    <div class="amt">${inr(+r.wage+ +r.extra)}${+r.extra?`<small>+${inr(r.extra)} extra</small>`:''}</div></div>`}).join(''):'<div class="empty">Entry a awm lo.<br>＋ hmet la, thar belh rawh.</div>';
+const sk=s=>s==='Half Day'?'Half':s;
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tot=r=>(+r.wage||0)+(+r.extra||0);
+const monthRows=(y,m)=>data.filter(r=>r.date.startsWith(y+'-'+pad(m+1)));
+const sum=rows=>rows.reduce((a,r)=>{a.w+=+r.wage||0;a.x+=+r.extra||0;a.t+=tot(r);
+  if(r.status==='Present')a.d+=1;else if(r.status==='Half Day')a.d+=.5;a.c[r.status]=(a.c[r.status]||0)+1;return a},{w:0,x:0,t:0,d:0,c:{}});
+const fmtDays=n=>Number.isInteger(n)?n:n.toFixed(1);
+const dateObj=s=>new Date(s+'T00:00:00');
+function longMonth(d){return d.toLocaleDateString(T[lang].locale,{month:'long'})}
+function toast(msg,undoFn){
+  const el=$('toast');$('toastTxt').textContent=msg;const b=$('toastBtn');
+  if(undoFn){b.style.display='';b.textContent=t('undo');b.onclick=()=>{undoFn();el.classList.remove('show')}}else b.style.display='none';
+  el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),undoFn?4500:2200);
 }
-const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const buzz=()=>safe(()=>navigator.vibrate&&navigator.vibrate(12));
 
-function openForm(r){
+/* ---------- Static text ---------- */
+function applyLang(){
+  document.documentElement.lang=lang==='hi'?'hi':'en';
+  $('langCode').textContent={mi:'MI',en:'EN',hi:'HI'}[lang];
+  $('subtitle').textContent=t('sub');
+  $('tLabel').textContent=t('monthTotal');$('lDays').textContent=t('days');$('lWage').textContent=t('wage');$('lExtra').textContent=t('extra');
+  $('calTitle').textContent=t('cal');$('listTitle').textContent=t('entries');$('search').placeholder=t('search');
+  $('tabHome').textContent=t('home');$('tabStats').textContent=t('stats');$('tabSet').textContent=t('set');
+  $('brkTitle').textContent=t('brk');$('dayChartTitle').textContent=t('dayChart');$('monChartTitle').textContent=t('monChart');$('sumTitle').textContent=t('sum');$('shareBtn').textContent='📤  '+t('share');
+  $('setLang').textContent=t('lang');$('setTheme').textContent=t('theme');$('setRate').textContent=t('defRate');$('setRateH').textContent=t('defRateH');
+  const th=$('segTheme').children;th[0].textContent=t('auto');th[1].textContent=t('light');th[2].textContent=t('dark');
+  $('dataTitle').textContent=t('data');$('expCsv').textContent='⬇️  '+t('expCsv');$('impCsv').textContent='⬆️  '+t('impCsv');
+  $('expJson').textContent='💾  '+t('expJson');$('impJson').textContent='♻️  '+t('impJson');$('clearAll').textContent='🗑  '+t('clear');
+  $('aboutCard').innerHTML='<div class="empty" style="padding:6px">'+esc(t('about'))+'</div>';
+  $('foot').innerHTML=t('foot');
+  $('lDate').textContent=t('date');$('lStatus').textContent=t('status');$('lRate').textContent=t('rate');$('lWageF').textContent=t('calc');
+  $('lExtraF').textContent=t('extraAmt');$('lNote').textContent=t('note');$('fNote').placeholder=t('notePh');
+  $('fSave').textContent=t('save');$('fCancel').textContent=t('cancel');
+  [...$('stsel').children].forEach(b=>b.querySelector('em').textContent=t(b.dataset.s));
+  [...$('segLang').children].forEach(b=>b.classList.toggle('on',b.dataset.v===lang));
+  [...$('segTheme').children].forEach(b=>b.classList.toggle('on',b.dataset.v===theme));
+  $('rateIn').value=rate;
+  $('legend').innerHTML=['Present','Half Day','Absent','Holiday'].map(s=>`<span><i style="background:var(--${sk(s)})"></i>${esc(t(s))}</span>`).join('');
+}
+function applyTheme(){
+  const r=document.documentElement;
+  if(theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',theme);
+  const dark=theme==='dark'||(theme==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);
+  document.querySelector('meta[name=theme-color]').content=dark?'#0b3f3a':'#0f766e';
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const y=cur.getFullYear(),m=cur.getMonth();
+  const rows=monthRows(y,m);const s=sum(rows);
+  $('mLabel').textContent=longMonth(cur);$('mSub').textContent=String(y);
+  $('sTotal').textContent=inr(s.t);$('sDays').textContent=fmtDays(s.d);$('sWage').textContent=inr(s.w);$('sExtra').textContent=inr(s.x);
+  renderQuick();renderCal(y,m,rows);renderList(rows);
+  if(tab==='stats')renderStats(y,m,rows,s);
+}
+function renderQuick(){
+  const now=new Date(),isCur=now.getFullYear()===cur.getFullYear()&&now.getMonth()===cur.getMonth();
+  const has=data.some(r=>r.date===ymd(now));
+  const q=$('quick');q.style.display=(isCur&&!has)?'flex':'none';
+  $('quickTxt').textContent=t('quick');$('quickBtn').textContent='✓ '+t('quickBtn')+' · '+inr(rate);
+}
+function renderCal(y,m,rows){
+  const first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),today=ymd(new Date());
+  let h=T[lang].wd.map(w=>`<div class="wd">${esc(w)}</div>`).join('');
+  for(let i=0;i<first;i++)h+='<div class="d e"></div>';
+  for(let d=1;d<=dim;d++){
+    const ds=y+'-'+pad(m+1)+'-'+pad(d),ents=rows.filter(r=>r.date===ds);
+    const cls=['d'];if(ents.length){cls.push(sk(ents[0].status));if(ents.length>1)cls.push('multi')}
+    if(ds===today)cls.push('today');
+    const amt=ents.length?`<small>${ents.reduce((a,r)=>a+tot(r),0)}</small>`:'';
+    h+=`<button class="${cls.join(' ')}" data-d="${ds}">${d}${amt}</button>`;
+  }
+  $('cal').innerHTML=h;
+}
+function renderList(rows){
+  const q=query.trim().toLowerCase();
+  let r=[...rows].sort((a,b)=>b.date.localeCompare(a.date));
+  if(q)r=r.filter(x=>(x.note||'').toLowerCase().includes(q)||t(x.status).toLowerCase().includes(q)||x.status.toLowerCase().includes(q));
+  $('list').innerHTML=r.length?r.map(x=>{const dt=dateObj(x.date);
+    const wk=dt.toLocaleDateString(T[lang].locale,{weekday:'short'});
+    const ex=+x.extra;
+    return `<div class="item" data-id="${esc(x.id)}"><div class="dt ${sk(x.status)}"><b>${dt.getDate()}</b><span>${esc(wk)}</span></div>
+      <div class="mid"><div class="s">${esc(t(x.status))}</div><div class="n">${esc(x.note)||'—'}</div></div>
+      <div class="amt">${inr(tot(x))}${ex?`<small class="${ex<0?'neg':''}">${ex>0?'+':''}${inr(ex)} ${esc(t('extra'))}</small>`:''}</div></div>`}).join('')
+    :`<div class="empty"><span class="big">📒</span>${esc(t('none'))}<br>${esc(t('noneH'))}</div>`;
+}
+function barChart(vals,labels,color,w=320,h=140){
+  const max=Math.max(1,...vals),n=vals.length,bw=(w-20)/n,top=14,base=h-18;
+  let g='';
+  vals.forEach((v,i)=>{const bh=v>0?Math.max(3,(v/max)*(base-top)):0,x=10+i*bw;
+    g+=`<rect x="${x+bw*.15}" y="${base-bh}" width="${bw*.7}" height="${bh}" rx="${Math.min(4,bw*.3)}" fill="${color}" opacity="${v>0?1:.18}"/>`;
+    if(labels[i]!=='')g+=`<text x="${x+bw/2}" y="${h-4}" text-anchor="middle">${labels[i]}</text>`;});
+  g+=`<text x="10" y="9">${inr(max)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img">${g}<line x1="10" x2="${w-10}" y1="${base}" y2="${base}" stroke="var(--line)"/></svg>`;
+}
+function renderStats(y,m,rows,s){
+  const cs={Present:0,'Half Day':0,Absent:0,Holiday:0};rows.forEach(r=>cs[r.status]=(cs[r.status]||0)+1);
+  const n=Math.max(1,rows.length);
+  $('brkBar').innerHTML=Object.keys(cs).filter(k=>cs[k]).map(k=>`<div style="width:${cs[k]/n*100}%;background:var(--${sk(k)})"></div>`).join('');
+  $('brkGrid').innerHTML=Object.keys(cs).map(k=>`<div class="stat"><span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--${sk(k)});margin-right:5px"></i>${esc(t(k))}</span><b>${cs[k]}</b></div>`).join('');
+  const dim=new Date(y,m+1,0).getDate(),dv=[],dl=[];
+  for(let d=1;d<=dim;d++){const ds=y+'-'+pad(m+1)+'-'+pad(d);dv.push(rows.filter(r=>r.date===ds).reduce((a,r)=>a+tot(r),0));dl.push(d===1||d%5===0?d:'')}
+  $('dayChart').innerHTML=barChart(dv,dl,'var(--pri2)');
+  const mv=[],ml=[];
+  for(let i=0;i<12;i++){mv.push(sum(monthRows(y,i)).t);ml.push(new Date(y,i,1).toLocaleDateString(T[lang].locale,{month:'short'}).slice(0,3))}
+  $('monChartTitle').textContent=t('monChart')+' · '+y;
+  $('monChart').innerHTML=barChart(mv,ml,'var(--pri)');
+  const yearRows=data.filter(r=>r.date.startsWith(y+'-')),ys=sum(yearRows),as=sum(data);
+  const best=rows.reduce((b,r)=>tot(r)>(b?tot(b):-1)?r:b,null);
+  $('sumGrid').innerHTML=[
+    [t('avg'),s.d?inr(s.t/s.d):'—'],[t('best'),best?inr(tot(best)):'—'],
+    [t('yearTot')+' ('+y+')',inr(ys.t)],[t('allTot'),inr(as.t)]
+  ].map(([k,v])=>`<div class="stat"><span>${esc(k)}</span><b>${v}</b></div>`).join('');
+}
+
+/* ---------- Form ---------- */
+function setStatus(s){draftStatus=s;[...$('stsel').children].forEach(b=>b.classList.toggle('on',b.dataset.s===s))}
+function recalc(){$('fWage').value=Math.round((+$('fRate').value||0)*factor[draftStatus]*100)/100}
+function openForm(r,dateStr){
   editing=r||null;
-  $('dTitle').textContent=r?'Entry siam thatna':'Entry thar';
-  $('fDate').value=r?r.date:ymd(new Date());
-  $('fStatus').value=r?r.status:'Present';
-  $('fRate').value=r?r.rate:rate;
+  $('dTitle').textContent=r?t('editE'):t('newE');
+  $('fDate').value=r?r.date:(dateStr||ymd(new Date()));
+  setStatus(r?r.status:'Present');
+  $('fRate').value=r?(r.rate||rate):rate;
   $('fWage').value=r?r.wage:rate;
   $('fExtra').value=r?r.extra:0;
   $('fNote').value=r?r.note:'';
   $('fDel').style.display=r?'':'none';
   $('dlg').showModal();
 }
-const recalc=()=>$('fWage').value=(+$('fRate').value||0)*factor[$('fStatus').value];
-$('fStatus').onchange=recalc;$('fRate').oninput=recalc;
+$('stsel').onclick=e=>{const b=e.target.closest('button');if(!b)return;setStatus(b.dataset.s);recalc();buzz()};
+$('fRate').oninput=recalc;
 $('add').onclick=()=>openForm();
 $('fCancel').onclick=()=>$('dlg').close();
-$('f').onsubmit=e=>{
-  const r={id:editing?editing.id:Date.now()+''+Math.random().toString(36).slice(2,6),date:$('fDate').value,status:$('fStatus').value,rate:+$('fRate').value||0,wage:+$('fWage').value||0,extra:+$('fExtra').value||0,note:$('fNote').value.trim()};
-  if(editing)data[data.indexOf(editing)]=r;else data.push(r);
-  save();cur=new Date(r.date+'T00:00');cur.setDate(1);render();
+$('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))$('dlg').close()});
+$('f').onsubmit=()=>{
+  const r={id:editing?editing.id:Date.now()+''+Math.random().toString(36).slice(2,6),date:$('fDate').value,status:draftStatus,
+    rate:+$('fRate').value||0,wage:+$('fWage').value||0,extra:+$('fExtra').value||0,note:$('fNote').value.trim()};
+  if(editing){const i=data.indexOf(editing);if(i>-1)data[i]=r}else data.push(r);
+  save();cur=dateObj(r.date);cur.setDate(1);render();toast('✓ '+t('saved'));buzz();
 };
-$('fDel').onclick=()=>{if(confirm('He entry hi delete a ni ang a?')){data=data.filter(r=>r!==editing);save();$('dlg').close();render()}};
+$('fDel').onclick=()=>{
+  if(!editing)return;const old=editing;
+  if(!confirm(t('delQ')))return;
+  data=data.filter(r=>r!==old);save();$('dlg').close();render();
+  toast(t('deleted'),()=>{data.push(old);save();render()});
+};
+
+/* ---------- Interactions ---------- */
+$('cal').onclick=e=>{const b=e.target.closest('.d[data-d]');if(!b)return;const ds=b.dataset.d;const ex=data.find(r=>r.date===ds);openForm(ex,ds);buzz()};
 $('list').onclick=e=>{const el=e.target.closest('.item');if(el)openForm(data.find(r=>r.id===el.dataset.id))};
-$('prev').onclick=()=>{cur.setMonth(cur.getMonth()-1);render()};
-$('next').onclick=()=>{cur.setMonth(cur.getMonth()+1);render()};
+$('search').oninput=e=>{query=e.target.value;render()};
+$('quickBtn').onclick=()=>{
+  const d=ymd(new Date());
+  data.push({id:Date.now()+'q',date:d,status:'Present',rate:rate,wage:rate,extra:0,note:''});
+  save();render();toast('✓ '+t('marked'));buzz();
+};
+const go=n=>{cur.setMonth(cur.getMonth()+n);render()};
+$('prev').onclick=()=>go(-1);$('next').onclick=()=>go(1);
+let sx=null;
+document.addEventListener('touchstart',e=>{sx=e.target.closest('#cal')?e.touches[0].clientX:null},{passive:true});
+document.addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>70)go(dx<0?1:-1)},{passive:true});
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.tab;
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+tab));
+  $('add').style.display=tab==='set'?'none':'';
+  render();scrollTo({top:0,behavior:'smooth'});
+});
+$('langQuick').onclick=()=>{const o=['mi','en','hi'];setLang(o[(o.indexOf(lang)+1)%3])};
+function setLang(l){lang=l;safe(()=>localStorage.setItem(LK,l));applyLang();render()}
+$('segLang').onclick=e=>{const b=e.target.closest('button');if(b)setLang(b.dataset.v)};
+$('segTheme').onclick=e=>{const b=e.target.closest('button');if(!b)return;theme=b.dataset.v;safe(()=>localStorage.setItem(TK,theme));applyTheme();applyLang()};
+$('rateIn').onchange=e=>{rate=+e.target.value||800;safe(()=>localStorage.setItem(RK,rate));e.target.value=rate;renderQuick();toast('✓ '+t('saved'))};
 
-$('setBtn').onclick=()=>{$('setRate').value=rate;$('sdlg').showModal()};
-$('setClose').onclick=()=>$('sdlg').close();
-$('setSave').onclick=()=>{rate=+$('setRate').value||800;localStorage.setItem(RK,rate)};
-
-$('exp').onclick=()=>{
-  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+/* ---------- Share / Export / Import ---------- */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+$('shareBtn').onclick=async()=>{
+  const rows=monthRows(cur.getFullYear(),cur.getMonth()),s=sum(rows);
+  const txt=`📒 ${t('shareHdr')} — ${longMonth(cur)} ${cur.getFullYear()}\n${t('workDays')}: ${fmtDays(s.d)}\n${t('wage')}: ${inr(s.w)}\n${t('extra')}: ${inr(s.x)}\n${t('total')}: ${inr(s.t)}`;
+  try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){if(e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(txt);toast('✓ Copied')}catch(e){prompt('',txt)}
+};
+const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+$('expCsv').onclick=()=>{
   const lines=['"Date","Status","Calculated Wage","Extra Amount","Note"',...[...data].sort((a,b)=>a.date.localeCompare(b.date)).map(r=>[r.date,r.status,r.wage,r.extra,r.note].map(q).join(','))];
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
-  a.download='WorkLedger-'+ymd(cur).slice(0,7)+'.csv';a.click();
+  download('WorkLedger-'+ymd(cur).slice(0,7)+'.csv','﻿'+lines.join('\n'),'text/csv');
 };
-$('imp').onclick=()=>$('file').click();
-$('file').onchange=async e=>{
-  const txt=await e.target.files[0].text();let n=0;
-  txt.split(/\r?\n/).slice(1).filter(Boolean).forEach(l=>{
-    const c=[...l.matchAll(/"((?:[^"]|"")*)"|([^,]+)/g)].map(m=>(m[1]??m[2]).replace(/""/g,'"'));
-    if(!/^\d{4}-\d\d-\d\d$/.test(c[0]))return;
-    const ex=data.find(r=>r.date===c[0]&&r.note===(c[4]||''));if(ex)return;
-    data.push({id:Date.now()+''+n++,date:c[0],status:c[1]||'Present',rate:rate,wage:+c[2]||0,extra:+c[3]||0,note:c[4]||''});
-  });
-  save();render();alert(n+' entry import ani.');e.target.value='';
+$('impCsv').onclick=()=>$('fileCsv').click();
+function parseCsvLine(l){const out=[];let cur='',inq=false;for(let i=0;i<l.length;i++){const c=l[i];
+  if(inq){if(c==='"'){if(l[i+1]==='"'){cur+='"';i++}else inq=false}else cur+=c}
+  else if(c==='"')inq=true;else if(c===','){out.push(cur);cur=''}else cur+=c}
+  out.push(cur);return out}
+$('fileCsv').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;let n=0;
+  try{
+    const txt=(await f.text()).replace(/^﻿/,'');
+    txt.split(/\r?\n/).slice(1).filter(Boolean).forEach(l=>{
+      const c=parseCsvLine(l);if(!/^\d{4}-\d\d-\d\d$/.test(c[0]))return;
+      const st=['Present','Half Day','Absent','Holiday'].includes(c[1])?c[1]:'Present';
+      if(data.find(r=>r.date===c[0]&&r.note===(c[4]||'')&&r.status===st&&+r.wage===(+c[2]||0)))return;
+      data.push({id:Date.now()+'i'+n++,date:c[0],status:st,rate:rate,wage:+c[2]||0,extra:+c[3]||0,note:c[4]||''});
+    });
+    save();render();toast('✓ '+n+' '+t('imported'));
+  }catch(err){toast(t('badFile'))}
+  e.target.value='';
 };
-render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+$('expJson').onclick=()=>download('WorkLedger-backup-'+ymd(new Date())+'.json',JSON.stringify({app:'workledger',v:2,rate,lang,theme,data},null,1),'application/json');
+$('impJson').onclick=()=>$('fileJson').click();
+$('fileJson').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const j=JSON.parse(await f.text());if(!Array.isArray(j.data))throw 0;
+    data=j.data.filter(r=>r&&/^\d{4}-\d\d-\d\d$/.test(r.date)).map(r=>({id:String(r.id||Date.now()+Math.random()),date:r.date,status:r.status||'Present',rate:+r.rate||0,wage:+r.wage||0,extra:+r.extra||0,note:r.note||''}));
+    if(j.rate){rate=+j.rate;safe(()=>localStorage.setItem(RK,rate))}
+    save();applyLang();render();toast('✓ '+t('restored'));
+  }catch(err){toast(t('badFile'))}
+  e.target.value='';
+};
+$('clearAll').onclick=()=>{if(confirm(t('clearQ'))){const old=data;data=[];save();render();toast(t('deleted'),()=>{data=old;save();render()})}};
+
+/* ---------- Init ---------- */
+applyTheme();applyLang();render();
+$('add').style.display='';
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
